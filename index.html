@@ -6,6 +6,7 @@
 <title>Thaghr — ثغر</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Outfit',sans-serif;background:#0a0a0a;color:#f0ede8;min-height:100vh;}
@@ -120,6 +121,37 @@ body{font-family:'Outfit',sans-serif;background:#0a0a0a;color:#f0ede8;min-height
 }
 .no-results.show{display:block;}
 
+.loading{text-align:center;padding:3rem 2rem;color:#444;font-size:13px;font-weight:300;}
+
+.modal-overlay{
+  display:none;position:fixed;top:0;left:0;width:100%;height:100%;
+  background:rgba(0,0,0,.6);z-index:50;
+  align-items:center;justify-content:center;padding:1.5rem;
+}
+.modal-overlay.show{display:flex;}
+.modal{
+  background:#0f0f0f;border:0.5px solid #222;border-radius:14px;
+  max-width:440px;width:100%;padding:1.75rem;
+}
+.modal h3{font-family:'Playfair Display',serif;font-size:22px;font-weight:600;margin-bottom:1.25rem;color:#e8e5e0;}
+.modal label{display:block;font-size:12px;color:#666;margin-bottom:5px;margin-top:14px;font-weight:400;}
+.modal input,.modal textarea{
+  width:100%;background:#161616;border:0.5px solid #222;border-radius:8px;
+  color:#e8e5e0;padding:9px 12px;font-size:13px;font-family:'Outfit',sans-serif;
+  resize:vertical;
+}
+.modal input:focus,.modal textarea:focus{outline:none;border-color:#444;}
+.modal-checks{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;}
+.modal-actions{display:flex;gap:10px;margin-top:1.5rem;}
+.modal-btn{
+  flex:1;padding:10px;border-radius:999px;font-size:13px;font-weight:500;
+  cursor:pointer;border:0.5px solid #222;background:none;color:#aaa;font-family:'Outfit',sans-serif;
+}
+.modal-btn.primary{background:#f0ede8;color:#0a0a0a;border-color:#f0ede8;}
+.modal-btn:hover{opacity:.85;}
+.modal-status{font-size:12px;color:#4a8c4a;margin-top:.75rem;display:none;}
+.modal-status.show{display:block;}
+
 @media(max-width:600px){
   .t-hero{padding:3rem 1.25rem 2rem;}
   .t-title{font-size:36px;}
@@ -165,135 +197,14 @@ body{font-family:'Outfit',sans-serif;background:#0a0a0a;color:#f0ede8;min-height
   <div class="t-count" id="countLine">Showing all 5 projects</div>
 
   <div class="t-grid" id="projectGrid">
-
-    <div class="p-card" data-skills="frontend,design,writing" data-time="15,60,ongoing">
-      <div class="p-top">
-        <div class="p-left">
-          <div class="p-name">Case for Islam</div>
-          <div class="p-desc">An interactive argument tree for the rational case for Islam, based on the GORAP framework — built for non-Muslims and powered by Muslim community contributions.</div>
-        </div>
-        <div class="p-badge new">New</div>
-      </div>
-      <div class="p-tags">
-        <div class="p-tag">Frontend</div>
-        <div class="p-tag">Design</div>
-        <div class="p-tag">Writing</div>
-        <div class="p-tag">Da'wah</div>
-      </div>
-      <div class="p-task">
-        <i class="ti ti-arrow-right p-task-icon"></i>
-        <div class="p-task-text"><strong>Good first task:</strong> Improve the mobile layout of the argument tree, or add 2–3 sourced arguments to any GORAP section.</div>
-      </div>
-      <div class="p-foot">
-        <a class="p-link" href="https://github.com/YOUR_USERNAME/case-for-islam" target="_blank"><i class="ti ti-brand-github"></i> View repo</a>
-        <div class="p-time"><i class="ti ti-clock"></i> 15 min+</div>
-      </div>
-    </div>
-
-    <div class="p-card" data-skills="frontend,backend,writing,translation" data-time="60,ongoing">
-      <div class="p-top">
-        <div class="p-left">
-          <div class="p-name">Quranic Universal Library (QUL)</div>
-          <div class="p-desc">The largest open-source library of Quranic content — translations, tafsir, audio. Powers thousands of Islamic apps worldwide. Actively maintained with 15 open issues tagged "needs help".</div>
-        </div>
-        <div class="p-badge">Active</div>
-      </div>
-      <div class="p-tags">
-        <div class="p-tag">Frontend</div>
-        <div class="p-tag">Backend</div>
-        <div class="p-tag">Ruby</div>
-        <div class="p-tag">Translation</div>
-        <div class="p-tag">Quran</div>
-      </div>
-      <div class="p-task">
-        <i class="ti ti-arrow-right p-task-icon"></i>
-        <div class="p-task-text"><strong>Good first task:</strong> Pick any of the 15 open issues tagged "needs help" — ranges from data corrections to UI improvements.</div>
-      </div>
-      <div class="p-foot">
-        <a class="p-link" href="https://github.com/TarteelAI/quranic-universal-library" target="_blank"><i class="ti ti-brand-github"></i> View repo</a>
-        <div class="p-time"><i class="ti ti-clock"></i> 1 hour+</div>
-      </div>
-    </div>
-
-    <div class="p-card" data-skills="backend,writing" data-time="60,ongoing">
-      <div class="p-top">
-        <div class="p-left">
-          <div class="p-name">Aladhan API</div>
-          <div class="p-desc">A widely used prayer times API powering hundreds of Islamic apps globally. Open source and actively maintained.</div>
-        </div>
-        <div class="p-badge">Active</div>
-      </div>
-      <div class="p-tags">
-        <div class="p-tag">Backend</div>
-        <div class="p-tag">API</div>
-        <div class="p-tag">Documentation</div>
-        <div class="p-tag">Prayer times</div>
-      </div>
-      <div class="p-task">
-        <i class="ti ti-arrow-right p-task-icon"></i>
-        <div class="p-task-text"><strong>Good first task:</strong> Improve the API documentation — several endpoints are underdocumented and confusing for new developers.</div>
-      </div>
-      <div class="p-foot">
-        <a class="p-link" href="https://github.com/islamic-network/al-adhan-api" target="_blank"><i class="ti ti-brand-github"></i> View repo</a>
-        <div class="p-time"><i class="ti ti-clock"></i> 1 hour+</div>
-      </div>
-    </div>
-
-    <div class="p-card" data-skills="ml,backend" data-time="ongoing">
-      <div class="p-top">
-        <div class="p-left">
-          <div class="p-name">Tarteel AI — Quran Recitation Recognition</div>
-          <div class="p-desc">ML-powered Quran recitation recognition and feedback. Their core data pipeline and evaluation tools are open to contribution from researchers.</div>
-        </div>
-        <div class="p-badge">Research</div>
-      </div>
-      <div class="p-tags">
-        <div class="p-tag">ML / AI</div>
-        <div class="p-tag">Audio</div>
-        <div class="p-tag">Python</div>
-        <div class="p-tag">Quran</div>
-      </div>
-      <div class="p-task">
-        <i class="ti ti-arrow-right p-task-icon"></i>
-        <div class="p-task-text"><strong>Good first task:</strong> Review their open evaluation datasets and contribute tajweed error annotations — requires Quran knowledge and ML background.</div>
-      </div>
-      <div class="p-foot">
-        <a class="p-link" href="https://github.com/TarteelAI" target="_blank"><i class="ti ti-brand-github"></i> View repo</a>
-        <div class="p-time"><i class="ti ti-clock"></i> Ongoing</div>
-      </div>
-    </div>
-
-    <div class="p-card" data-skills="frontend,backend,design,writing,translation" data-time="15,60,ongoing">
-      <div class="p-top">
-        <div class="p-left">
-          <div class="p-name">Thaghr — this platform</div>
-          <div class="p-desc">Thaghr itself needs contributors — curating projects, verifying active issues, building the platform, writing descriptions, and translating content.</div>
-        </div>
-        <div class="p-badge new">New</div>
-      </div>
-      <div class="p-tags">
-        <div class="p-tag">All skills</div>
-        <div class="p-tag">Curation</div>
-        <div class="p-tag">Frontend</div>
-        <div class="p-tag">Writing</div>
-      </div>
-      <div class="p-task">
-        <i class="ti ti-arrow-right p-task-icon"></i>
-        <div class="p-task-text"><strong>Good first task:</strong> Find one active Islamic OS project not listed here, verify it is maintained, and submit it via the form below.</div>
-      </div>
-      <div class="p-foot">
-        <a class="p-link" href="https://github.com/YOUR_USERNAME/thaghr" target="_blank"><i class="ti ti-brand-github"></i> View repo</a>
-        <div class="p-time"><i class="ti ti-clock"></i> 15 min+</div>
-      </div>
-    </div>
-
+    <div class="loading">Loading projects...</div>
   </div>
 
   <div class="no-results" id="noResults">No projects match your current filters. Try a different skill or time range.</div>
 
   <div class="t-submit">
     <div class="submit-text"><strong>Know an active Islamic OS project?</strong><br>Submit it and help fill another gap in the ummah.</div>
-    <button class="submit-btn" onclick="window.location.href='mailto:contact@thaghr.dev?subject=Project submission'">Submit a project →</button>
+    <button class="submit-btn" onclick="openModal()">Submit a project →</button>
   </div>
 
   <div class="t-footer">
@@ -302,8 +213,89 @@ body{font-family:'Outfit',sans-serif;background:#0a0a0a;color:#f0ede8;min-height
   </div>
 
 </div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h3>Submit a project</h3>
+    <label>Project name</label>
+    <input type="text" id="subName" placeholder="e.g. Quran Companion App">
+    <label>Description</label>
+    <textarea id="subDesc" rows="3" placeholder="What does it do, and what's the gap it fills?"></textarea>
+    <label>Repo URL</label>
+    <input type="text" id="subRepo" placeholder="https://github.com/...">
+    <label>Skills needed</label>
+    <div class="modal-checks" id="subSkills">
+      <div class="ftag" data-val="frontend"><i class="ti ti-code"></i> Frontend</div>
+      <div class="ftag" data-val="backend"><i class="ti ti-server"></i> Backend</div>
+      <div class="ftag" data-val="ml"><i class="ti ti-brain"></i> ML / AI</div>
+      <div class="ftag" data-val="design"><i class="ti ti-brush"></i> Design</div>
+      <div class="ftag" data-val="writing"><i class="ti ti-pencil"></i> Writing</div>
+      <div class="ftag" data-val="translation"><i class="ti ti-language"></i> Translation</div>
+    </div>
+    <label>Your email (optional)</label>
+    <input type="email" id="subEmail" placeholder="for follow-up questions">
+    <div class="modal-actions">
+      <button class="modal-btn" onclick="closeModal()">Cancel</button>
+      <button class="modal-btn primary" onclick="submitProject()">Submit</button>
+    </div>
+    <div class="modal-status" id="modalStatus">Thanks! We'll review it and add it soon, in shaa Allah.</div>
+  </div>
+</div>
 <script>
+const SUPABASE_URL = 'https://vismlemfppwgujjwvkcv.supabase.co';
+const SUPABASE_KEY = 'sb_publishable__K9zO-_U_n222VX-B__AUQ_NzXwBdPG';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
 let activeSkill='all', activeTime='all';
+let allProjects=[];
+
+const ICONS={frontend:'ti-code',backend:'ti-server',ml:'ti-brain',design:'ti-brush',writing:'ti-pencil',translation:'ti-language'};
+const LABELS={frontend:'Frontend',backend:'Backend',ml:'ML / AI',design:'Design',writing:'Writing',translation:'Translation'};
+const TIME_LABELS={'15':'15 min+','60':'1 hour+','ongoing':'Ongoing'};
+
+async function loadProjects(){
+  const {data, error} = await sb.from('projects').select('*').eq('approved', true).order('created_at',{ascending:true});
+  const grid=document.getElementById('projectGrid');
+  if(error||!data||data.length===0){
+    grid.innerHTML='<div class="loading">No projects yet. Check back soon.</div>';
+    return;
+  }
+  allProjects=data;
+  renderProjects();
+}
+
+function renderProjects(){
+  const grid=document.getElementById('projectGrid');
+  grid.innerHTML='';
+  allProjects.forEach(p=>{
+    const skillsArr=p.skills||[];
+    const timeArr=p.time_options||[];
+    const tagsHTML=skillsArr.map(s=>`<div class="p-tag">${LABELS[s]||s}</div>`).join('');
+    const badgeClass=p.badge==='new'?'new':'';
+    const taskHTML=p.good_first_task?`<div class="p-task"><i class="ti ti-arrow-right p-task-icon"></i><div class="p-task-text"><strong>Good first task:</strong> ${p.good_first_task}</div></div>`:'';
+    const minTime=timeArr.includes('15')?'15':timeArr.includes('60')?'60':'ongoing';
+    const card=document.createElement('div');
+    card.className='p-card';
+    card.dataset.skills=skillsArr.join(',');
+    card.dataset.time=timeArr.join(',');
+    card.innerHTML=`
+      <div class="p-top">
+        <div class="p-left">
+          <div class="p-name">${p.name}</div>
+          <div class="p-desc">${p.description}</div>
+        </div>
+        <div class="p-badge ${badgeClass}">${p.badge==='new'?'New':p.badge==='research'?'Research':'Active'}</div>
+      </div>
+      <div class="p-tags">${tagsHTML}</div>
+      ${taskHTML}
+      <div class="p-foot">
+        <a class="p-link" href="${p.repo_url}" target="_blank"><i class="ti ti-brand-github"></i> View repo</a>
+        <div class="p-time"><i class="ti ti-clock"></i> ${TIME_LABELS[minTime]}</div>
+      </div>`;
+    grid.appendChild(card);
+  });
+  updateFilters();
+}
 
 function updateFilters(){
   const cards=document.querySelectorAll('.p-card');
@@ -322,17 +314,65 @@ function updateFilters(){
   document.getElementById('noResults').classList.toggle('show',visible===0);
 }
 
-document.querySelectorAll('.ftag').forEach(tag=>{
+document.querySelectorAll('.t-filters .ftag').forEach(tag=>{
   tag.addEventListener('click',()=>{
     const filter=tag.dataset.filter;
     const val=tag.dataset.val;
-    document.querySelectorAll(`.ftag[data-filter="${filter}"]`).forEach(t=>t.classList.remove('on'));
+    document.querySelectorAll(`.t-filters .ftag[data-filter="${filter}"]`).forEach(t=>t.classList.remove('on'));
     tag.classList.add('on');
     if(filter==='skill') activeSkill=val;
     else activeTime=val;
     updateFilters();
   });
 });
+
+// Modal + submission
+document.querySelectorAll('#subSkills .ftag').forEach(tag=>{
+  tag.addEventListener('click',()=>tag.classList.toggle('on'));
+});
+
+function openModal(){document.getElementById('modalOverlay').classList.add('show');}
+function closeModal(){
+  document.getElementById('modalOverlay').classList.remove('show');
+  document.getElementById('modalStatus').classList.remove('show');
+}
+
+async function submitProject(){
+  const name=document.getElementById('subName').value.trim();
+  const description=document.getElementById('subDesc').value.trim();
+  const repo_url=document.getElementById('subRepo').value.trim();
+  const submitter_email=document.getElementById('subEmail').value.trim();
+  const skills=[...document.querySelectorAll('#subSkills .ftag.on')].map(t=>t.dataset.val);
+
+  if(!name||!repo_url){
+    alert('Please at least fill in the project name and repo URL.');
+    return;
+  }
+
+  const {error} = await sb.from('pending_submissions').insert([{
+    name, description, repo_url, skills, submitter_email
+  }]);
+
+  if(error){
+    alert('Something went wrong. Please try again.');
+    console.error(error);
+    return;
+  }
+
+  document.getElementById('modalStatus').classList.add('show');
+  document.getElementById('subName').value='';
+  document.getElementById('subDesc').value='';
+  document.getElementById('subRepo').value='';
+  document.getElementById('subEmail').value='';
+  document.querySelectorAll('#subSkills .ftag.on').forEach(t=>t.classList.remove('on'));
+  setTimeout(closeModal, 2200);
+}
+
+document.getElementById('modalOverlay').addEventListener('click',(e)=>{
+  if(e.target.id==='modalOverlay') closeModal();
+});
+
+loadProjects();
 </script>
 </body>
 </html>
