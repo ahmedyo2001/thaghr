@@ -1,1 +1,132 @@
 
+# Thaghr — ثغر
+
+> *Find the gap. Fill it.*
+
+---
+
+## What is this?
+
+The Muslim ummah has millions of skilled people — developers, designers, writers, translators — who want to contribute to something meaningful but don't know where to start.
+
+They search. They find abandoned repos, outdated lists, and dead links. They give up.
+
+**Thaghr** solves this. It is a curated, verified platform that connects skilled Muslims to active open source Islamic projects — matched by skill and time available.
+
+The name comes from the Arabic **ثغر** — a gap, a breach, a frontier that needs defending. The scholars of Islam used it to describe any gap in the ummah's defences that needed to be filled. Today, there are gaps in Islamic technology, knowledge, and infrastructure. Thaghr helps you find yours.
+
+---
+
+## How it works
+
+1. You arrive and select your skill and available time
+2. Thaghr shows you active Islamic projects that match
+3. Each project listing includes what it needs, a specific open task, and how to get started
+4. You contribute — and the ummah moves forward
+
+No digging through dead repos. No figuring out what skills a project needs. No wasted time.
+
+---
+
+## Who can contribute to Thaghr itself?
+
+Anyone. Thaghr is for all skills — not just developers:
+
+| Skill | Example contribution |
+|-------|---------------------|
+| **Frontend / Backend** | Build features, fix bugs, improve performance |
+| **Design** | UI/UX improvements, icons, visual identity |
+| **Writing** | Project descriptions, documentation, blog posts |
+| **Translation** | Make content accessible in more languages |
+| **Research** | Find and verify active Islamic OS projects |
+| **Testing** | QA, bug reports, user testing |
+
+---
+
+## Sample projects on Thaghr
+
+These are the kinds of projects Thaghr lists — verified active, with specific tasks linked.
+
+### Case for Islam
+**What it is:** An interactive, structured argument for Islam based on the GORAP framework — built for non-Muslims exploring the rational case for Islam, powered by Muslim community contributions.
+**Needs:** Frontend developers (React), content contributors (Islamic knowledge), designers
+**Good first task:** Improve the mobile layout of the argument tree
+**Repo:** [github.com/yourname/case-for-islam](https://github.com/yourname/case-for-islam)
+
+### Quranic Universal Library (QUL)
+**What it is:** The largest open-source library of Quranic content — translations, tafsir, audio recitations. Used by thousands of apps worldwide.
+**Needs:** Ruby developers, data contributors, translators
+**Good first task:** Pick from 15 open issues tagged "needs help"
+**Repo:** [github.com/TarteelAI/quranic-universal-library](https://github.com/TarteelAI/quranic-universal-library)
+
+### Aladhan API
+**What it is:** A widely used prayer times API powering hundreds of Islamic apps globally.
+**Needs:** Backend developers, documentation writers
+**Good first task:** Improve API documentation clarity
+**Repo:** [github.com/islamic-network/al-adhan-api](https://github.com/islamic-network/al-adhan-api)
+
+---
+
+## Submitting a project
+
+If you know an active Islamic open source project that belongs on Thaghr, submit it via the form on the site.
+
+**We only list projects that are:**
+- Actively maintained (commits in the last 6 months)
+- Open to external contributors
+- Serving the Muslim community or da'wah
+- Have at least one clear task a newcomer can pick up
+
+All submissions are reviewed before going live.
+
+---
+
+## Project status
+
+Thaghr is in early development. Current focus:
+
+- [ ] Core project listing page with skill + time filter
+- [ ] Initial set of 5–8 verified projects
+- [ ] Project submission form
+- [ ] Review and moderation pipeline
+
+---
+
+## Roadmap
+
+**v0 — One day build**
+A single clean webpage. Hand-curated list of 5–8 verified active Islamic OS projects. Filter by skill and time. Each entry links to a specific open task. Deployed on GitHub Pages.
+
+**v1 — Dynamic listings**
+Projects submit via a form. GitHub API integration keeps open issues up to date automatically. Moderation pipeline for new submissions.
+
+**v2 — Personalisation**
+User profiles with skills and availability. Weekly digest: "Here's what you can contribute this week." Smarter matching over time.
+
+**v3 — Community layer**
+Contributors share completed work. Accountability partners. A live feed of Muslim contributions across the Islamic tech world. This turns a directory into a movement.
+
+**v4 — Beyond code**
+Designers, writers, translators, and testers all have a dedicated space. "I have 15 minutes and I speak Urdu" → here is exactly what you can do right now.
+
+**Long-term vision:**
+The central coordination layer for Islamic tech contributions globally — channelling Muslim skills toward meaningful work, and making every contribution visible and celebrated.
+
+---
+
+## The name
+
+**ثغر** (thaghr) — historically referred to the frontier posts of the Islamic world: the gaps that needed defenders. Scholars and soldiers alike were called to fill the thaghr of their time.
+
+The thaghr of our time is in technology, knowledge infrastructure, and digital da'wah. This platform exists to help the ummah find and fill it.
+
+---
+
+## License
+
+MIT License — open for anyone to use, fork, and build upon.
+
+---
+
+*Built with the intention of benefiting the ummah.*
+*"The best of people are those most beneficial to others." — Prophet Muhammad ﷺ*
