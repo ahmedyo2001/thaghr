@@ -25,7 +25,7 @@ const GITHUB_TOKEN = process.env.GH_TOKEN; // provided automatically by GitHub A
 
 const sb = createClient(SUPABASE_URL, SUPABASE_SECRET_KEY);
 
-const TARGET_LABELS = ['good first issue', 'help wanted', 'good-first-issue', 'beginner-friendly', 'documentation'];
+const TARGET_LABELS = ['good first issue', 'help wanted', 'good-first-issue', 'beginner-friendly', 'documentation', 'enhancement', 'feature', 'bug', 'up-for-grabs', 'contributions-welcome'];
 
 // Fallback heuristic if the LLM call fails - maps label name to a rough time estimate
 const LABEL_TIME_FALLBACK = {
@@ -33,7 +33,12 @@ const LABEL_TIME_FALLBACK = {
   'good-first-issue': '15',
   'beginner-friendly': '15',
   'documentation': '15',
+  'bug': '15',
   'help wanted': '60',
+  'up-for-grabs': '60',
+  'contributions-welcome': '60',
+  'enhancement': 'ongoing',
+  'feature': 'ongoing',
 };
 
 // Extract "owner/repo" from a GitHub URL like https://github.com/owner/repo
