@@ -8,11 +8,14 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
+/* === GLOBAL RESET & BASE STYLES === */
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Outfit',sans-serif;background:#0a0a0a;color:#f0ede8;min-height:100vh;}
 
+/* Page container - centers everything, caps width on large screens */
 .t-wrap{max-width:860px;margin:0 auto;padding:0 0 4rem;}
 
+/* === HERO SECTION (title, tagline, intro) === */
 .t-hero{padding:4rem 2rem 2.5rem;text-align:center;border-bottom:0.5px solid #1a1a1a;}
 .t-arabic{font-size:36px;letter-spacing:.05em;color:#333;margin-bottom:1rem;}
 .t-title{font-family:'Playfair Display',serif;font-size:52px;font-weight:600;line-height:1.1;margin-bottom:.25rem;color:#f0ede8;}
@@ -20,6 +23,7 @@ body{font-family:'Outfit',sans-serif;background:#0a0a0a;color:#f0ede8;min-height
 .t-tagline{font-size:12px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:#444;margin-bottom:.9rem;}
 .t-sub{font-size:14px;color:#666;line-height:1.7;max-width:420px;margin:0 auto;font-weight:300;}
 
+/* === SKILL / TIME FILTER BUTTONS === */
 .t-filters{padding:1.75rem 2rem 0;}
 .filter-label{font-size:11px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;color:#444;margin-bottom:.6rem;}
 .filter-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:1.1rem;}
@@ -38,6 +42,7 @@ body{font-family:'Outfit',sans-serif;background:#0a0a0a;color:#f0ede8;min-height
 
 .t-count{font-size:12px;color:#444;margin:1.25rem 2rem .5rem;font-weight:300;}
 
+/* === PROJECT CARDS GRID (filled dynamically by JS from Supabase) === */
 .t-grid{padding:.5rem 2rem 2rem;display:flex;flex-direction:column;gap:10px;}
 
 .p-card{
@@ -90,6 +95,7 @@ body{font-family:'Outfit',sans-serif;background:#0a0a0a;color:#f0ede8;min-height
 .p-time{margin-left:auto;font-size:11px;color:#333;font-weight:300;}
 .p-time i{font-size:12px;vertical-align:-1px;margin-right:3px;}
 
+/* === "SUBMIT A PROJECT" CALL-TO-ACTION BAR === */
 .t-submit{
   margin:0 2rem 2rem;padding:1.25rem 1.5rem;
   border:0.5px dashed #1e1e1e;border-radius:14px;
@@ -107,6 +113,7 @@ body{font-family:'Outfit',sans-serif;background:#0a0a0a;color:#f0ede8;min-height
 }
 .submit-btn:hover{background:#161616;color:#e8e5e0;}
 
+/* === FOOTER === */
 .t-footer{
   text-align:center;padding:1.5rem 2rem 0;
   border-top:0.5px solid #111;
@@ -115,14 +122,17 @@ body{font-family:'Outfit',sans-serif;background:#0a0a0a;color:#f0ede8;min-height
 .t-footer a{color:#555;text-decoration:none;}
 .t-footer a:hover{color:#888;}
 
+/* Shown when filters match zero projects */
 .no-results{
   text-align:center;padding:3rem 2rem;color:#444;
   font-size:14px;font-weight:300;display:none;
 }
 .no-results.show{display:block;}
 
+/* Shown while projects are being fetched from Supabase */
 .loading{text-align:center;padding:3rem 2rem;color:#444;font-size:13px;font-weight:300;}
 
+/* === SUBMIT PROJECT MODAL (popup form) === */
 .modal-overlay{
   display:none;position:fixed;top:0;left:0;width:100%;height:100%;
   background:rgba(0,0,0,.6);z-index:50;
@@ -164,8 +174,11 @@ body{font-family:'Outfit',sans-serif;background:#0a0a0a;color:#f0ede8;min-height
 </style>
 </head>
 <body>
+<!-- ============ MAIN PAGE WRAPPER ============ -->
 <div class="t-wrap">
 
+  
+  <!-- Hero: site title + tagline -->
   <div class="t-hero">
     <div class="t-arabic">ثغر</div>
     <div class="t-title">Thaghr <span>— find the gap.</span></div>
@@ -173,6 +186,8 @@ body{font-family:'Outfit',sans-serif;background:#0a0a0a;color:#f0ede8;min-height
     <div class="t-sub">Active Islamic open source projects that need your skills — matched to your time and expertise.</div>
   </div>
 
+  
+  <!-- Filter bar: clicking a tag re-filters the cards below via JS -->
   <div class="t-filters">
     <div class="filter-label">Your skill</div>
     <div class="filter-row">
@@ -194,19 +209,29 @@ body{font-family:'Outfit',sans-serif;background:#0a0a0a;color:#f0ede8;min-height
     </div>
   </div>
 
+  
+  <!-- Live count of visible projects, updated by updateFilters() -->
   <div class="t-count" id="countLine">Showing all 5 projects</div>
 
+  
+  <!-- Project cards are injected here by renderProjects() -->
   <div class="t-grid" id="projectGrid">
     <div class="loading">Loading projects...</div>
   </div>
 
+  
+  <!-- Shown when filters return zero matching cards -->
   <div class="no-results" id="noResults">No projects match your current filters. Try a different skill or time range.</div>
 
+  
+  <!-- Call to action: opens the submission modal -->
   <div class="t-submit">
     <div class="submit-text"><strong>Know an active Islamic OS project?</strong><br>Submit it and help fill another gap in the ummah.</div>
     <button class="submit-btn" onclick="openModal()">Submit a project →</button>
   </div>
 
+  
+  <!-- Footer with hadith + open source link -->
   <div class="t-footer">
     <p>ثغر — <em>"The best of people are those most beneficial to others."</em> — Prophet Muhammad ﷺ</p>
     <p style="margin-top:.4rem;"><a href="https://github.com/YOUR_USERNAME/thaghr">Open source</a> · Built for the ummah</p>
@@ -214,6 +239,9 @@ body{font-family:'Outfit',sans-serif;background:#0a0a0a;color:#f0ede8;min-height
 
 </div>
 
+
+<!-- ============ SUBMIT PROJECT MODAL ============ -->
+<!-- Hidden by default; shown via openModal() when "Submit a project" is clicked -->
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal">
     <h3>Submit a project</h3>
@@ -242,17 +270,25 @@ body{font-family:'Outfit',sans-serif;background:#0a0a0a;color:#f0ede8;min-height
   </div>
 </div>
 <script>
+// ============ SUPABASE SETUP ============
+// Public connection info - safe to expose in the browser because
+// Row Level Security (RLS) policies restrict what these keys can do:
+// - "publishable" key can only READ approved projects, and INSERT into pending_submissions
 const SUPABASE_URL = 'https://vismlemfppwgujjwvkcv.supabase.co';
 const SUPABASE_KEY = 'sb_publishable__K9zO-_U_n222VX-B__AUQ_NzXwBdPG';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+// Currently selected filters (start as "show everything")
 let activeSkill='all', activeTime='all';
+// Cache of all approved projects fetched from Supabase
 let allProjects=[];
 
+// Maps internal skill keys -> Tabler icon class names and display labels
 const ICONS={frontend:'ti-code',backend:'ti-server',ml:'ti-brain',design:'ti-brush',writing:'ti-pencil',translation:'ti-language'};
 const LABELS={frontend:'Frontend',backend:'Backend',ml:'ML / AI',design:'Design',writing:'Writing',translation:'Translation'};
 const TIME_LABELS={'15':'15 min+','60':'1 hour+','ongoing':'Ongoing'};
 
+// Fetch all approved projects from Supabase (runs once on page load)
 async function loadProjects(){
   const {data, error} = await sb.from('projects').select('*').eq('approved', true).order('created_at',{ascending:true});
   const grid=document.getElementById('projectGrid');
@@ -264,6 +300,8 @@ async function loadProjects(){
   renderProjects();
 }
 
+// Build the HTML for each project card and insert into the grid.
+// Re-applies filters afterwards via updateFilters().
 function renderProjects(){
   const grid=document.getElementById('projectGrid');
   grid.innerHTML='';
@@ -297,6 +335,8 @@ function renderProjects(){
   updateFilters();
 }
 
+// Show/hide project cards based on the currently selected skill + time filters,
+// and update the "Showing X of Y projects" counter.
 function updateFilters(){
   const cards=document.querySelectorAll('.p-card');
   let visible=0;
@@ -314,6 +354,7 @@ function updateFilters(){
   document.getElementById('noResults').classList.toggle('show',visible===0);
 }
 
+// Wire up click handlers for the filter tag buttons (skill + time)
 document.querySelectorAll('.t-filters .ftag').forEach(tag=>{
   tag.addEventListener('click',()=>{
     const filter=tag.dataset.filter;
@@ -326,17 +367,23 @@ document.querySelectorAll('.t-filters .ftag').forEach(tag=>{
   });
 });
 
+// ============ SUBMISSION MODAL LOGIC ============
 // Modal + submission
+// Skill tags inside the submission form are simple on/off toggles
 document.querySelectorAll('#subSkills .ftag').forEach(tag=>{
   tag.addEventListener('click',()=>tag.classList.toggle('on'));
 });
 
+// Show/hide the submission popup
 function openModal(){document.getElementById('modalOverlay').classList.add('show');}
 function closeModal(){
   document.getElementById('modalOverlay').classList.remove('show');
   document.getElementById('modalStatus').classList.remove('show');
 }
 
+// Validate the form, write the new submission to Supabase's
+// "pending_submissions" table (awaiting manual review/approval),
+// then show a confirmation message and reset the form.
 async function submitProject(){
   const name=document.getElementById('subName').value.trim();
   const description=document.getElementById('subDesc').value.trim();
@@ -368,10 +415,12 @@ async function submitProject(){
   setTimeout(closeModal, 2200);
 }
 
+// Clicking the dark overlay (outside the modal box) closes the modal
 document.getElementById('modalOverlay').addEventListener('click',(e)=>{
   if(e.target.id==='modalOverlay') closeModal();
 });
 
+// Kick everything off: fetch and render projects on page load
 loadProjects();
 </script>
 </body>
