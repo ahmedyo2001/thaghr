@@ -72,14 +72,29 @@ body{font-family:'Outfit',sans-serif;background:#0a0a0a;color:#f0ede8;min-height
   border:0.5px solid #1e1e1e;color:#444;font-weight:400;
 }
 
+/* List of individual GitHub issue "tasks" inside a project card */
+.p-tasks{display:flex;flex-direction:column;gap:6px;margin-bottom:.9rem;}
 .p-task{
-  display:flex;align-items:flex-start;gap:8px;
-  padding:.75rem 1rem;border-radius:10px;
-  background:#0d0d0d;border:0.5px solid #1a1a1a;margin-bottom:.9rem;
+  display:flex;align-items:center;gap:8px;
+  padding:.6rem .9rem;border-radius:10px;
+  background:#0d0d0d;border:0.5px solid #1a1a1a;
+  text-decoration:none;
 }
-.p-task-icon{font-size:14px;color:#333;flex-shrink:0;margin-top:2px;}
-.p-task-text{font-size:12px;color:#666;line-height:1.6;font-weight:300;}
-.p-task-text strong{font-weight:500;color:#aaa;}
+.p-task:hover{border-color:#2a2a2a;}
+.p-task-icon{font-size:13px;color:#333;flex-shrink:0;}
+.p-task-text{font-size:12px;color:#999;line-height:1.5;font-weight:300;flex:1;}
+.p-task-badges{display:flex;gap:5px;flex-shrink:0;}
+.p-task-label,.p-task-time{
+  font-size:10px;padding:2px 8px;border-radius:999px;
+  border:0.5px solid #222;color:#555;white-space:nowrap;font-weight:500;
+}
+.p-task-empty{font-size:12px;color:#444;font-weight:300;padding:.6rem .9rem;font-style:italic;}
+
+/* "Last updated" freshness badge - color signals how recently the repo was active */
+.p-fresh{font-size:11px;font-weight:500;padding:3px 9px;border-radius:999px;border:0.5px solid #222;white-space:nowrap;}
+.p-fresh.fresh{color:#4a8c4a;border-color:#1a3a1a;background:#0d1f0d;}
+.p-fresh.ok{color:#8c7a4a;border-color:#3a321a;background:#1f1a0d;}
+.p-fresh.stale{color:#666;border-color:#222;background:#161616;}
 
 .p-foot{display:flex;align-items:center;gap:8px;}
 .p-link{
@@ -207,6 +222,12 @@ body{font-family:'Outfit',sans-serif;background:#0a0a0a;color:#f0ede8;min-height
       <div class="ftag" data-filter="time" data-val="60"><i class="ti ti-clock"></i> 1 hour</div>
       <div class="ftag" data-filter="time" data-val="ongoing"><i class="ti ti-infinity"></i> Ongoing</div>
     </div>
+
+    <div class="filter-label">Repo activity</div>
+    <div class="filter-row">
+      <div class="ftag on" data-filter="fresh" data-val="all"><i class="ti ti-list"></i> All repos</div>
+      <div class="ftag" data-filter="fresh" data-val="active"><i class="ti ti-flame"></i> Active only</div>
+    </div>
   </div>
 
   
@@ -279,7 +300,7 @@ const SUPABASE_KEY = 'sb_publishable__K9zO-_U_n222VX-B__AUQ_NzXwBdPG';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // Currently selected filters (start as "show everything")
-let activeSkill='all', activeTime='all';
+let activeSkill='all', activeTime='all', activeFresh='all';
 // Cache of all approved projects fetched from Supabase
 let allProjects=[];
 
@@ -289,6 +310,25 @@ const LABELS={frontend:'Frontend',backend:'Backend',ml:'ML / AI',design:'Design'
 const TIME_LABELS={'15':'15 min+','60':'1 hour+','ongoing':'Ongoing'};
 
 // Fetch all approved projects from Supabase (runs once on page load)
+// Convert a last_commit timestamp into a human label + freshness class
+// (fresh = within 30 days, ok = within 6 months, stale = older / unknown)
+function freshnessInfo(lastCommit){
+  if(!lastCommit) return {label:'Last updated: unknown', cls:'stale'};
+  const days=Math.floor((Date.now()-new Date(lastCommit).getTime())/(1000*60*60*24));
+  let label;
+  if(days<1) label='Updated today';
+  else if(days===1) label='Updated yesterday';
+  else if(days<30) label=`Updated ${days}d ago`;
+  else if(days<365) label=`Updated ${Math.floor(days/30)}mo ago`;
+  else label=`Updated ${Math.floor(days/365)}y ago`;
+
+  let cls;
+  if(days<=30) cls='fresh';
+  else if(days<=180) cls='ok';
+  else cls='stale';
+  return {label, cls, days};
+}
+
 async function loadProjects(){
   const {data, error} = await sb.from('projects').select('*').eq('approved', true).order('created_at',{ascending:true});
   const grid=document.getElementById('projectGrid');
@@ -307,12 +347,35 @@ function renderProjects(){
   grid.innerHTML='';
   allProjects.forEach(p=>{
     const skillsArr=p.skills||[];
-    const timeArr=p.time_options||[];
+    const timeArr=(p.time_options&&p.time_options.length)?p.time_options:['ongoing'];
     const tagsHTML=skillsArr.map(s=>`<div class="p-tag">${LABELS[s]||s}</div>`).join('');
     const badgeClass=p.badge==='new'?'new':'';
-    const taskHTML=p.good_first_task?`<div class="p-task"><i class="ti ti-arrow-right p-task-icon"></i><div class="p-task-text"><strong>Good first task:</strong> ${p.good_first_task}</div></div>`:'';
+
+    // Build the task list HTML from the "tasks" array (filled by the daily sync job).
+    // Each task shows: title (linked to the GitHub issue), its original label, and a time estimate.
+    let tasksHTML;
+    const tasks=p.tasks||[];
+    if(tasks.length>0){
+      tasksHTML='<div class="p-tasks">'+tasks.map(t=>`
+        <a class="p-task" href="${t.url}" target="_blank">
+          <i class="ti ti-arrow-right p-task-icon"></i>
+          <div class="p-task-text">${t.title}</div>
+          <div class="p-task-badges">
+            <div class="p-task-label">${t.label}</div>
+            <div class="p-task-time">${TIME_LABELS[t.time]||t.time}</div>
+          </div>
+        </a>`).join('')+'</div>';
+    } else if(p.good_first_task){
+      // Manual fallback if no synced tasks exist yet
+      tasksHTML=`<div class="p-tasks"><div class="p-task-empty">${p.good_first_task}</div></div>`;
+    } else {
+      tasksHTML='<div class="p-tasks"><div class="p-task-empty">No open tasks right now - check the repo.</div></div>';
+    }
+
     const minTime=timeArr.includes('15')?'15':timeArr.includes('60')?'60':'ongoing';
+    const fresh=freshnessInfo(p.last_commit);
     const card=document.createElement('div');
+    card.dataset.freshDays=(fresh.days===undefined?99999:fresh.days);
     card.className='p-card';
     card.dataset.skills=skillsArr.join(',');
     card.dataset.time=timeArr.join(',');
@@ -325,9 +388,10 @@ function renderProjects(){
         <div class="p-badge ${badgeClass}">${p.badge==='new'?'New':p.badge==='research'?'Research':'Active'}</div>
       </div>
       <div class="p-tags">${tagsHTML}</div>
-      ${taskHTML}
+      ${tasksHTML}
       <div class="p-foot">
         <a class="p-link" href="${p.repo_url}" target="_blank"><i class="ti ti-brand-github"></i> View repo</a>
+        <div class="p-fresh ${fresh.cls}">${fresh.label}</div>
         <div class="p-time"><i class="ti ti-clock"></i> ${TIME_LABELS[minTime]}</div>
       </div>`;
     grid.appendChild(card);
@@ -343,9 +407,12 @@ function updateFilters(){
   cards.forEach(card=>{
     const skills=card.dataset.skills.split(',');
     const times=card.dataset.time.split(',');
+    const freshDays=parseInt(card.dataset.freshDays,10);
     const skillMatch=activeSkill==='all'||skills.includes(activeSkill);
     const timeMatch=activeTime==='all'||times.includes(activeTime);
-    if(skillMatch&&timeMatch){card.classList.remove('hidden');visible++;}
+    // "Active only" hides repos with no commit in the last 180 days (or unknown)
+    const freshMatch=activeFresh==='all'||freshDays<=180;
+    if(skillMatch&&timeMatch&&freshMatch){card.classList.remove('hidden');visible++;}
     else card.classList.add('hidden');
   });
   const total=cards.length;
@@ -362,7 +429,8 @@ document.querySelectorAll('.t-filters .ftag').forEach(tag=>{
     document.querySelectorAll(`.t-filters .ftag[data-filter="${filter}"]`).forEach(t=>t.classList.remove('on'));
     tag.classList.add('on');
     if(filter==='skill') activeSkill=val;
-    else activeTime=val;
+    else if(filter==='time') activeTime=val;
+    else activeFresh=val;
     updateFilters();
   });
 });
