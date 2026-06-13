@@ -107,7 +107,7 @@ Respond with ONLY a JSON object, no other text, in this exact format:
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: 'qwen/qwen3-next-80b-a3b-instruct:free',
+        model: 'qwen/qwen3-235b-a22b:free',
         messages: [{ role: 'user', content: prompt }]
       })
     });
@@ -170,6 +170,9 @@ async function syncProject(project) {
       label: matchedLabel
     });
     timeSet.add(result.time);
+
+    // Avoid hitting OpenRouter's free-tier rate limit (20 requests/minute)
+    await new Promise(r => setTimeout(r, 4000));
   }
 
   const time_options = Array.from(timeSet);
