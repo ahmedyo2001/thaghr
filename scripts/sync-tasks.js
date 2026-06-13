@@ -116,7 +116,7 @@ Respond with ONLY a JSON object, no other text, in this exact format:
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: 'qwen/qwen3.6-flash',
+        model: 'meta-llama/llama-3.1-8b-instruct',
         messages: [{ role: 'user', content: prompt }]
       })
     });
