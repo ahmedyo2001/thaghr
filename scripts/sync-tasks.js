@@ -107,7 +107,7 @@ Respond with ONLY a JSON object, no other text, in this exact format:
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: 'qwen/qwen3-235b-a22b:free',
+        model: 'deepseek/deepseek-v4-flash',
         messages: [{ role: 'user', content: prompt }]
       })
     });
