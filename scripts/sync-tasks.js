@@ -4,10 +4,14 @@
 // For each project in Supabase:
 //   1. Fetches open issues from its GitHub repo
 //   2. Filters to issues labeled "good first issue" or "help wanted"
-//   3. Sends each issue to DeepSeek (via OpenRouter) to get a plain-English
+//   3. Sends each issue to an LLM (via OpenRouter) to get a plain-English
 //      summary + time estimate + relevant skill tags
 //   4. Writes the resulting "tasks" array back to the project's row in Supabase,
-//      and updates time_options to the union of all task time estimates
+//      updates time_options to the union of all task time estimates,
+//      and updates "skills" to the union of skills found across today's tasks
+//      (so a project's skill tags reflect what it currently needs, not a
+//      static manual label - if a project goes quiet with no issues today,
+//      its previous skills are kept rather than wiped).
 //
 // If the LLM call fails for any issue, falls back to a label-based heuristic
 // so the system degrades gracefully instead of breaking.
@@ -21,7 +25,7 @@ const GITHUB_TOKEN = process.env.GH_TOKEN; // provided automatically by GitHub A
 
 const sb = createClient(SUPABASE_URL, SUPABASE_SECRET_KEY);
 
-const TARGET_LABELS = ['good first issue', 'help wanted', 'good-first-issue', 'beginner-friendly', 'documentation'];
+const TARGET_LABELS = ['good first issue', 'help wanted', 'good-first-issue', 'beginner-friendly', 'documentation', 'enhancement', 'feature', 'bug', 'up-for-grabs', 'contributions-welcome'];
 
 // Fallback heuristic if the LLM call fails - maps label name to a rough time estimate
 const LABEL_TIME_FALLBACK = {
@@ -29,7 +33,12 @@ const LABEL_TIME_FALLBACK = {
   'good-first-issue': '15',
   'beginner-friendly': '15',
   'documentation': '15',
+  'bug': '15',
   'help wanted': '60',
+  'up-for-grabs': '60',
+  'contributions-welcome': '60',
+  'enhancement': 'ongoing',
+  'feature': 'ongoing',
 };
 
 // Extract "owner/repo" from a GitHub URL like https://github.com/owner/repo
@@ -86,7 +95,7 @@ function filterRelevantIssues(issues) {
   ).slice(0, 6); // cap per project to keep things manageable
 }
 
-// Ask DeepSeek (via OpenRouter) to summarize an issue and estimate effort
+// Ask the LLM (via OpenRouter) to summarize an issue and estimate effort
 async function classifyIssue(issue, matchedLabel) {
   const prompt = `You are helping categorize a GitHub issue for a "find something to contribute to" website aimed at developers and contributors with varying skill levels and free time.
 
@@ -107,7 +116,7 @@ Respond with ONLY a JSON object, no other text, in this exact format:
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: 'deepseek/deepseek-chat:free',
+        model: 'meta-llama/llama-3.1-8b-instruct',
         messages: [{ role: 'user', content: prompt }]
       })
     });
@@ -158,6 +167,7 @@ async function syncProject(project) {
 
   const tasks = [];
   const timeSet = new Set();
+  const skillSet = new Set();
 
   for (const issue of relevant) {
     const matchedLabel = (issue.labels.find(l => TARGET_LABELS.includes((l.name || '').toLowerCase())) || {}).name || 'help wanted';
@@ -170,13 +180,21 @@ async function syncProject(project) {
       label: matchedLabel
     });
     timeSet.add(result.time);
+    (result.skills || []).forEach(s => skillSet.add(s));
+
+    // Avoid hitting OpenRouter's free-tier rate limit (20 requests/minute)
+    await new Promise(r => setTimeout(r, 4000));
   }
 
   const time_options = Array.from(timeSet);
+  // Dynamic skills = union of skills across today's open tasks.
+  // If the LLM returned no skills at all (e.g. all calls failed), keep the
+  // project's existing skills rather than wiping out its categorization.
+  const skills = skillSet.size > 0 ? Array.from(skillSet) : project.skills;
 
   const { error } = await sb
     .from('projects')
-    .update({ tasks, time_options, last_commit: lastCommit })
+    .update({ tasks, time_options, last_commit: lastCommit, skills })
     .eq('id', project.id);
 
   if (error) {

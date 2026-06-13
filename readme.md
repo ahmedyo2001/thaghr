@@ -14,16 +14,21 @@ They search. They find abandoned repos, outdated lists, and dead links. They giv
 
 The name comes from the Arabic **ثغر** — a gap, a breach, a frontier that needs defending. The scholars of Islam used it to describe any gap in the ummah's defences that needed to be filled. Today, there are gaps in Islamic technology, knowledge, and infrastructure. Thaghr helps you find yours.
 
+**Live site:** [ahmedyo2001.github.io/thaghr](https://ahmedyo2001.github.io/thaghr)
+
 ---
 
 ## How it works
 
-1. You arrive and select your skill and available time
+1. You arrive and filter by your skill, time available, and repo activity
 2. Thaghr shows you active Islamic projects that match
-3. Each project listing includes what it needs, a specific open task, and how to get started
-4. You contribute — and the ummah moves forward
+3. Each project lists real, currently-open tasks — pulled live from GitHub, summarized in plain English, with a time estimate and skill tags
+4. You click a task, it takes you straight to the GitHub issue
+5. You contribute — and the ummah moves forward
 
 No digging through dead repos. No figuring out what skills a project needs. No wasted time.
+
+Behind the scenes, a daily automated job re-checks every listed repo, pulls its open "good first issue" / "help wanted" tasks, uses AI to summarize and estimate effort, and checks how recently the repo was updated — so listings stay fresh without manual upkeep.
 
 ---
 
@@ -40,64 +45,68 @@ Anyone. Thaghr is for all skills — not just developers:
 | **Research** | Find and verify active Islamic OS projects |
 | **Testing** | QA, bug reports, user testing |
 
+Thaghr's own open tasks are listed on the site itself — it's one of the projects you can filter for.
+
 ---
 
-## Sample projects on Thaghr
-
-These are the kinds of projects Thaghr lists — verified active, with specific tasks linked.
+## Currently listed projects
 
 ### Case for Islam
-**What it is:** An interactive, structured argument for Islam based on the GORAP framework — built for non-Muslims exploring the rational case for Islam, powered by Muslim community contributions.
-**Needs:** Frontend developers (React), content contributors (Islamic knowledge), designers
-**Good first task:** Improve the mobile layout of the argument tree
-**Repo:** [github.com/yourname/case-for-islam](https://github.com/yourname/case-for-islam)
+An interactive, animated argument tree for the rational case for Islam, based on the GORAP framework — built for non-Muslims exploring Islam, with arguments contributed and reviewed by the Muslim community.
+**Repo:** [github.com/ahmedyo2001/Case_for_Islam](https://github.com/ahmedyo2001/Case_for_Islam)
 
-### Quranic Universal Library (QUL)
-**What it is:** The largest open-source library of Quranic content — translations, tafsir, audio recitations. Used by thousands of apps worldwide.
-**Needs:** Ruby developers, data contributors, translators
-**Good first task:** Pick from 15 open issues tagged "needs help"
-**Repo:** [github.com/TarteelAI/quranic-universal-library](https://github.com/TarteelAI/quranic-universal-library)
+### Thaghr — this platform
+Thaghr itself needs contributors — building features, curating new projects, improving design, and writing content.
+**Repo:** [github.com/ahmedyo2001/thaghr](https://github.com/ahmedyo2001/thaghr)
 
-### Aladhan API
-**What it is:** A widely used prayer times API powering hundreds of Islamic apps globally.
-**Needs:** Backend developers, documentation writers
-**Good first task:** Improve API documentation clarity
-**Repo:** [github.com/islamic-network/al-adhan-api](https://github.com/islamic-network/al-adhan-api)
+More projects are added regularly as they're researched and verified. Know one that belongs here? Submit it via the form on the site.
 
 ---
 
 ## Submitting a project
 
-If you know an active Islamic open source project that belongs on Thaghr, submit it via the form on the site.
+Use the "Submit a project" button on the site. Submissions go into a review queue and are checked before going live.
 
 **We only list projects that are:**
-- Actively maintained (commits in the last 6 months)
+- Actively maintained (recent commits)
 - Open to external contributors
 - Serving the Muslim community or da'wah
 - Have at least one clear task a newcomer can pick up
 
-All submissions are reviewed before going live.
+---
+
+## How the listings stay fresh
+
+A scheduled job runs daily:
+
+1. Reads every approved project from the database
+2. Fetches each repo's open issues from GitHub
+3. Filters to issues labeled `good first issue`, `help wanted`, etc.
+4. Sends each one to an AI model to generate a short plain-English summary, a time estimate (15 min / 1 hour / ongoing), and relevant skill tags
+5. Records the repo's last commit date
+6. Updates the listing — all automatically, no manual editing needed
+
+Repos with no recent activity are flagged, and the "Active only" filter hides anything stale.
 
 ---
 
 ## Project status
 
-Thaghr is in early development. Current focus:
+**Built (v0 + most of v1):**
+- [x] Project listing page with skill, time, and activity filters
+- [x] Project submission form
+- [x] Daily automated sync of live GitHub tasks
+- [x] AI-generated task summaries, time estimates, and skill tags
+- [x] "Last updated" freshness indicators
 
-- [ ] Core project listing page with skill + time filter
-- [ ] Initial set of 5–8 verified projects
-- [ ] Project submission form
-- [ ] Review and moderation pipeline
+**Still to do:**
+- [ ] Admin review flow for submitted projects (currently manual)
+- [ ] Expand to 8–10+ verified projects
+- [ ] "Report broken link" feature for stale listings
 
 ---
 
 ## Roadmap
-
-**v0 — One day build**
-A single clean webpage. Hand-curated list of 5–8 verified active Islamic OS projects. Filter by skill and time. Each entry links to a specific open task. Deployed on GitHub Pages.
-
-**v1 — Dynamic listings**
-Projects submit via a form. GitHub API integration keeps open issues up to date automatically. Moderation pipeline for new submissions.
 
 **v2 — Personalisation**
 User profiles with skills and availability. Weekly digest: "Here's what you can contribute this week." Smarter matching over time.
