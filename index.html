@@ -113,7 +113,7 @@ body{font-family:'Outfit',sans-serif;background:#0a0a0a;color:#f0ede8;min-height
 
 /* === "SUBMIT A PROJECT" CALL-TO-ACTION BAR === */
 .t-submit{
-  margin:0 2rem 2rem;padding:1.25rem 1.5rem;
+  margin:1.5rem 2rem 2rem;padding:1.25rem 1.5rem;
   border:0.5px dashed #1e1e1e;border-radius:14px;
   display:flex;align-items:center;justify-content:space-between;gap:12px;
   background:#0d0d0d;
@@ -201,7 +201,11 @@ body{font-family:'Outfit',sans-serif;background:#0a0a0a;color:#f0ede8;min-height
     <div class="t-tagline">Fill it.</div>
     <div class="t-sub">Active Islamic open source projects that need your skills — matched to your time and expertise.</div>
   </div>
-
+  <!-- Call to action: opens the submission modal -->
+  <div class="t-submit">
+    <div class="submit-text"><strong>Know an active Islamic OS project?</strong><br>Submit it and help fill another gap in the ummah.</div>
+    <button class="submit-btn" onclick="openModal()">Submit a project →</button>
+  </div>
   
   <!-- Filter bar: clicking a tag re-filters the cards below via JS -->
   <div class="t-filters">
@@ -246,11 +250,7 @@ body{font-family:'Outfit',sans-serif;background:#0a0a0a;color:#f0ede8;min-height
   <div class="no-results" id="noResults">No projects match your current filters. Try a different skill or time range.</div>
 
   
-  <!-- Call to action: opens the submission modal -->
-  <div class="t-submit">
-    <div class="submit-text"><strong>Know an active Islamic OS project?</strong><br>Submit it and help fill another gap in the ummah.</div>
-    <button class="submit-btn" onclick="openModal()">Submit a project →</button>
-  </div>
+
 
   
   <!-- Footer with hadith + open source link -->
