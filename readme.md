@@ -47,19 +47,6 @@ Anyone. Thaghr is for all skills — not just developers:
 
 Thaghr's own open tasks are listed on the site itself — it's one of the projects you can filter for.
 
----
-
-## Currently listed projects
-
-### Case for Islam
-An interactive, animated argument tree for the rational case for Islam, based on the GORAP framework — built for non-Muslims exploring Islam, with arguments contributed and reviewed by the Muslim community.
-**Repo:** [github.com/ahmedyo2001/Case_for_Islam](https://github.com/ahmedyo2001/Case_for_Islam)
-
-### Thaghr — this platform
-Thaghr itself needs contributors — building features, curating new projects, improving design, and writing content.
-**Repo:** [github.com/ahmedyo2001/thaghr](https://github.com/ahmedyo2001/thaghr)
-
-More projects are added regularly as they're researched and verified. Know one that belongs here? Submit it via the form on the site.
 
 ---
 
