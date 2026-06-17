@@ -96,8 +96,9 @@ body{font-family:'Outfit',sans-serif;background:#0a0a0a;color:#f0ede8;min-height
 .p-fresh.fresh{color:#4a8c4a;border-color:#1a3a1a;background:#0d1f0d;}
 .p-fresh.ok{color:#8c7a4a;border-color:#3a321a;background:#1f1a0d;}
 .p-fresh.stale{color:#666;border-color:#222;background:#161616;}
-.p-stars{font-size:11px;color:#555;font-weight:400;display:inline-flex;align-items:center;gap:3px;}
-.p-stars i{font-size:11px;}
+.p-top-right{display:flex;align-items:center;gap:6px;flex-shrink:0;}
+.p-stars{font-size:11px;color:#c9a227;font-weight:500;display:inline-flex;align-items:center;gap:3px;}
+.p-stars i{font-size:12px;}
 
 .p-foot{display:flex;align-items:center;gap:8px;}
 .p-link{
@@ -396,13 +397,15 @@ function renderProjects(){
           <div class="p-name">${p.name}</div>
           <div class="p-desc">${p.description}</div>
         </div>
-        <div class="p-badge ${badgeClass}">${p.badge==='new'?'New':p.badge==='research'?'Research':'Active'}</div>
+        <div class="p-top-right">
+          ${p.stars!=null?`<div class="p-stars"><i class="ti ti-star-filled"></i> ${p.stars>=1000?(p.stars/1000).toFixed(1)+'k':p.stars}</div>`:''}
+          <div class="p-badge ${badgeClass}">${p.badge==='new'?'New':p.badge==='research'?'Research':'Active'}</div>
+        </div>
       </div>
       <div class="p-tags">${tagsHTML}</div>
       ${tasksHTML}
       <div class="p-foot">
         <a class="p-link" href="${p.repo_url}" target="_blank"><i class="ti ti-brand-github"></i> View repo</a>
-        ${p.stars!=null?`<div class="p-stars"><i class="ti ti-star"></i> ${p.stars>=1000?(p.stars/1000).toFixed(1)+'k':p.stars}</div>`:''}
         <div class="p-fresh ${fresh.cls}">${fresh.label}</div>
         <div class="p-time"><i class="ti ti-clock"></i> ${TIME_LABELS[minTime]}</div>
       </div>`;
