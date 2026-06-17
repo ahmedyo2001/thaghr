@@ -96,6 +96,8 @@ body{font-family:'Outfit',sans-serif;background:#0a0a0a;color:#f0ede8;min-height
 .p-fresh.fresh{color:#4a8c4a;border-color:#1a3a1a;background:#0d1f0d;}
 .p-fresh.ok{color:#8c7a4a;border-color:#3a321a;background:#1f1a0d;}
 .p-fresh.stale{color:#666;border-color:#222;background:#161616;}
+.p-stars{font-size:11px;color:#555;font-weight:400;display:inline-flex;align-items:center;gap:3px;}
+.p-stars i{font-size:11px;}
 
 .p-foot{display:flex;align-items:center;gap:8px;}
 .p-link{
@@ -310,6 +312,13 @@ const ICONS={frontend:'ti-code',backend:'ti-server',ml:'ti-brain',design:'ti-bru
 const LABELS={frontend:'Frontend',backend:'Backend',ml:'ML / AI',design:'Design',writing:'Writing',translation:'Translation'};
 const TIME_LABELS={'15':'15 min+','60':'1 hour+','ongoing':'Ongoing'};
 
+function formatDate(iso){
+  if(!iso) return '';
+  const d=new Date(iso);
+  const m=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return `${m[d.getMonth()]} ${d.getFullYear()}`;
+}
+
 // Fetch all approved projects from Supabase (runs once on page load)
 // Convert a last_commit timestamp into a human label + freshness class
 // (fresh = within 30 days, ok = within 6 months, stale = older / unknown)
@@ -364,6 +373,7 @@ function renderProjects(){
           <div class="p-task-badges">
             <div class="p-task-label">${t.label}</div>
             <div class="p-task-time">${TIME_LABELS[t.time]||t.time}</div>
+            ${t.opened_at?`<div class="p-task-time">${formatDate(t.opened_at)}</div>`:''}
           </div>
         </a>`).join('')+'</div>';
     } else if(p.good_first_task){
@@ -392,6 +402,7 @@ function renderProjects(){
       ${tasksHTML}
       <div class="p-foot">
         <a class="p-link" href="${p.repo_url}" target="_blank"><i class="ti ti-brand-github"></i> View repo</a>
+        ${p.stars!=null?`<div class="p-stars"><i class="ti ti-star"></i> ${p.stars>=1000?(p.stars/1000).toFixed(1)+'k':p.stars}</div>`:''}
         <div class="p-fresh ${fresh.cls}">${fresh.label}</div>
         <div class="p-time"><i class="ti ti-clock"></i> ${TIME_LABELS[minTime]}</div>
       </div>`;

@@ -67,7 +67,7 @@ async function fetchRepoInfo(owner, repo) {
     return null;
   }
   const data = await res.json();
-  return data.pushed_at || null; // ISO timestamp of last push to any branch
+  return { pushed_at: data.pushed_at || null, stars: data.stargazers_count ?? 0 };
 }
 
 // Fetch open issues from GitHub for a given owner/repo
@@ -154,14 +154,13 @@ async function syncProject(project) {
 
   const allIssues = await fetchIssues(parsed.owner, parsed.repo);
   const relevant = filterRelevantIssues(allIssues);
-  const lastCommit = await fetchRepoInfo(parsed.owner, parsed.repo);
+  const repoInfo = await fetchRepoInfo(parsed.owner, parsed.repo);
+  const lastCommit = repoInfo ? repoInfo.pushed_at : null;
+  const stars = repoInfo ? repoInfo.stars : null;
 
   if (relevant.length === 0) {
     console.log(`  No matching open issues found.`);
-    // Still update last_commit even if there are no tasks to add
-    if (lastCommit) {
-      await sb.from('projects').update({ last_commit: lastCommit }).eq('id', project.id);
-    }
+    await sb.from('projects').update({ last_commit: lastCommit, stars }).eq('id', project.id);
     return;
   }
 
@@ -177,7 +176,8 @@ async function syncProject(project) {
       title: result.summary,
       url: issue.html_url,
       time: result.time,
-      label: matchedLabel
+      label: matchedLabel,
+      opened_at: issue.created_at
     });
     timeSet.add(result.time);
     (result.skills || []).forEach(s => skillSet.add(s));
@@ -194,7 +194,7 @@ async function syncProject(project) {
 
   const { error } = await sb
     .from('projects')
-    .update({ tasks, time_options, last_commit: lastCommit, skills })
+    .update({ tasks, time_options, last_commit: lastCommit, skills, stars })
     .eq('id', project.id);
 
   if (error) {
