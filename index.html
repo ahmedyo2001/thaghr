@@ -42,7 +42,9 @@ body{font-family:'Outfit',sans-serif;background:#0a0a0a;color:#f0ede8;min-height
 .ftag.on{background:#f0ede8;color:#0a0a0a;border-color:#f0ede8;}
 .ftag i{font-size:13px;}
 
-.t-count{font-size:12px;color:#444;margin:1.25rem 2rem .5rem;font-weight:300;}
+.t-count{font-size:12px;color:#444;font-weight:300;}
+.t-sort-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:1.25rem 2rem .5rem;flex-wrap:wrap;}
+.sort-row{display:flex;gap:6px;}
 
 /* === PROJECT CARDS GRID (filled dynamically by JS from Supabase) === */
 .t-grid{padding:.5rem 2rem 2rem;display:flex;flex-direction:column;gap:10px;}
@@ -255,8 +257,15 @@ body{font-family:'Outfit',sans-serif;background:#0a0a0a;color:#f0ede8;min-height
   </div>
 
   
-  <!-- Live count of visible projects, updated by updateFilters() -->
-  <div class="t-count" id="countLine">Showing all 5 projects</div>
+  <!-- Count line + sort pills -->
+  <div class="t-sort-bar">
+    <div class="t-count" id="countLine">Showing all 5 projects</div>
+    <div class="sort-row">
+      <div class="ftag" data-sort="stars"><i class="ti ti-star"></i> Most starred</div>
+      <div class="ftag" data-sort="recent"><i class="ti ti-clock"></i> Recently updated</div>
+      <div class="ftag" data-sort="tasks"><i class="ti ti-list-check"></i> Most tasks</div>
+    </div>
+  </div>
 
   
   <!-- Project cards are injected here by renderProjects() -->
@@ -320,7 +329,7 @@ const SUPABASE_KEY = 'sb_publishable__K9zO-_U_n222VX-B__AUQ_NzXwBdPG';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // Currently selected filters (start as "show everything")
-let activeSkill='all', activeTime='all', activeFresh='all', activeFav='all';
+let activeSkill='all', activeTime='all', activeFresh='all', activeFav='all', activeSort='default';
 // Cache of all approved projects fetched from Supabase
 let allProjects=[];
 // Favourites: persisted to localStorage as a Set of project IDs
@@ -380,7 +389,26 @@ async function loadProjects(){
     return;
   }
   allProjects=data;
+  sortProjects();
+}
+
+function sortProjects(){
+  const sorted=[...allProjects];
+  if(activeSort==='stars'){
+    sorted.sort((a,b)=>(b.stars??-1)-(a.stars??-1));
+  } else if(activeSort==='recent'){
+    sorted.sort((a,b)=>{
+      const da=a.last_commit?new Date(a.last_commit):new Date(0);
+      const db=b.last_commit?new Date(b.last_commit):new Date(0);
+      return db-da;
+    });
+  } else if(activeSort==='tasks'){
+    sorted.sort((a,b)=>(b.tasks?.length??0)-(a.tasks?.length??0));
+  }
+  const orig=allProjects;
+  allProjects=sorted;
   renderProjects();
+  allProjects=orig;
 }
 
 // Build the HTML for each project card and insert into the grid.
@@ -483,6 +511,17 @@ document.querySelectorAll('.t-filters .ftag').forEach(tag=>{
     else if(filter==='fresh') activeFresh=val;
     else if(filter==='fav') activeFav=val;
     updateFilters();
+  });
+});
+
+// Sort pill click handlers — toggle: clicking the active pill resets to default order
+document.querySelectorAll('.sort-row .ftag').forEach(tag=>{
+  tag.addEventListener('click',()=>{
+    const wasOn=tag.classList.contains('on');
+    document.querySelectorAll('.sort-row .ftag').forEach(t=>t.classList.remove('on'));
+    if(!wasOn){ tag.classList.add('on'); activeSort=tag.dataset.sort; }
+    else activeSort='default';
+    sortProjects();
   });
 });
 
