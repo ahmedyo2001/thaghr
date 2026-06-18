@@ -16,16 +16,13 @@
 // If the LLM call fails for any issue, falls back to a label-based heuristic
 // so the system degrades gracefully instead of breaking.
 
-const { createClient } = require('@supabase/supabase-js');
-
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SECRET_KEY = process.env.SUPABASE_SECRET_KEY;
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
 const GITHUB_TOKEN = process.env.GH_TOKEN; // provided automatically by GitHub Actions
 
-const sb = createClient(SUPABASE_URL, SUPABASE_SECRET_KEY);
-
 const TARGET_LABELS = ['good first issue', 'help wanted', 'good-first-issue', 'beginner-friendly', 'documentation', 'enhancement', 'feature', 'bug', 'up-for-grabs', 'contributions-welcome'];
+const ALLOWED_SKILLS = ['frontend', 'backend', 'ml', 'design', 'writing', 'translation'];
 
 // Fallback heuristic if the LLM call fails - maps label name to a rough time estimate
 const LABEL_TIME_FALLBACK = {
@@ -40,6 +37,20 @@ const LABEL_TIME_FALLBACK = {
   'enhancement': 'ongoing',
   'feature': 'ongoing',
 };
+
+// Fallback skill tags keep projects discoverable when the LLM returns no
+// usable tags. They are intentionally broad and limited to the UI filter set.
+const LABEL_SKILL_FALLBACK = {
+  'documentation': ['writing'],
+  'bug': ['backend'],
+  'enhancement': ['backend'],
+  'feature': ['backend'],
+};
+
+function createSupabaseClient() {
+  const { createClient } = require('@supabase/supabase-js');
+  return createClient(SUPABASE_URL, SUPABASE_SECRET_KEY);
+}
 
 // Extract "owner/repo" from a GitHub URL like https://github.com/owner/repo
 function parseRepo(url) {
@@ -95,6 +106,19 @@ function filterRelevantIssues(issues) {
   ).slice(0, 6); // cap per project to keep things manageable
 }
 
+function normalizeSkills(skills, matchedLabel) {
+  const allowed = new Set(ALLOWED_SKILLS);
+  const normalized = Array.isArray(skills)
+    ? skills
+        .map(skill => String(skill).trim().toLowerCase())
+        .filter(skill => allowed.has(skill))
+    : [];
+  const uniqueSkills = [...new Set(normalized)];
+  if (uniqueSkills.length > 0) return uniqueSkills;
+
+  return LABEL_SKILL_FALLBACK[matchedLabel] || [];
+}
+
 // Ask the LLM (via OpenRouter) to summarize an issue and estimate effort
 async function classifyIssue(issue, matchedLabel) {
   const prompt = `You are helping categorize a GitHub issue for a "find something to contribute to" website aimed at developers and contributors with varying skill levels and free time.
@@ -132,19 +156,19 @@ Respond with ONLY a JSON object, no other text, in this exact format:
     return {
       summary: parsed.summary || issue.title,
       time: ['15', '60', 'ongoing'].includes(parsed.time) ? parsed.time : '60',
-      skills: Array.isArray(parsed.skills) ? parsed.skills : []
+      skills: normalizeSkills(parsed.skills, matchedLabel)
     };
   } catch (err) {
     console.warn(`  LLM classification failed for issue #${issue.number}, using fallback:`, err.message);
     return {
       summary: issue.title,
       time: LABEL_TIME_FALLBACK[matchedLabel] || '60',
-      skills: []
+      skills: normalizeSkills([], matchedLabel)
     };
   }
 }
 
-async function syncProject(project) {
+async function syncProject(project, sb) {
   console.log(`Syncing: ${project.name}`);
   const parsed = parseRepo(project.repo_url);
   if (!parsed) {
@@ -205,6 +229,7 @@ async function syncProject(project) {
 }
 
 async function main() {
+  const sb = createSupabaseClient();
   const { data: projects, error } = await sb.from('projects').select('*').eq('approved', true);
   if (error) {
     console.error('Failed to fetch projects:', error.message);
@@ -214,7 +239,7 @@ async function main() {
   console.log(`Found ${projects.length} approved project(s).`);
 
   for (const project of projects) {
-    await syncProject(project);
+    await syncProject(project, sb);
     // Small delay to be polite to APIs and stay under free-tier rate limits
     await new Promise(r => setTimeout(r, 1500));
   }
@@ -222,4 +247,11 @@ async function main() {
   console.log('Done.');
 }
 
-main();
+if (require.main === module) {
+  main();
+}
+
+module.exports = {
+  ALLOWED_SKILLS,
+  normalizeSkills,
+};
