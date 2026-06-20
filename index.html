@@ -118,6 +118,9 @@ body{font-family:'Outfit',sans-serif;background:#0a0a0a;color:#f0ede8;min-height
 }
 .p-link:hover{background:#161616;color:#e8e5e0;}
 .p-link i{font-size:13px;}
+.p-report{color:#666;}
+.p-report:hover{color:#e8e5e0;}
+.p-report.reported{color:#4a8c4a;border-color:#1a3a1a;background:#0d1f0d;cursor:default;}
 .p-time{margin-left:auto;font-size:11px;color:#333;font-weight:300;}
 .p-time i{font-size:12px;vertical-align:-1px;margin-right:3px;}
 
@@ -334,6 +337,7 @@ let activeSkill='all', activeTime='all', activeFresh='all', activeFav='all', act
 let allProjects=[];
 // Favourites: persisted to localStorage as a Set of project IDs
 let favourites=new Set(JSON.parse(localStorage.getItem('thaghr_favs')||'[]'));
+let reportedLinks=new Set(JSON.parse(localStorage.getItem('thaghr_link_reports')||'[]'));
 
 // Maps internal skill keys -> Tabler icon class names and display labels
 const ICONS={frontend:'ti-code',backend:'ti-server',ml:'ti-brain',design:'ti-brush',writing:'ti-pencil',translation:'ti-language'};
@@ -352,6 +356,33 @@ function toggleFav(id, btn){
   }
   localStorage.setItem('thaghr_favs',JSON.stringify([...favourites]));
   updateFilters();
+}
+
+async function reportBrokenLink(id, btn){
+  if(reportedLinks.has(id)||btn.disabled) return;
+  const project=allProjects.find(p=>p.id===id);
+  btn.disabled=true;
+  const originalHTML=btn.innerHTML;
+  btn.innerHTML='<i class="ti ti-loader-2"></i> Reporting';
+
+  const {error}=await sb.from('link_reports').insert([{
+    project_id:id,
+    repo_url:project?.repo_url||null,
+    reported_at:new Date().toISOString()
+  }]);
+
+  if(error){
+    console.error(error);
+    btn.disabled=false;
+    btn.innerHTML=originalHTML;
+    alert('Could not report this link yet. Please try again.');
+    return;
+  }
+
+  reportedLinks.add(id);
+  localStorage.setItem('thaghr_link_reports',JSON.stringify([...reportedLinks]));
+  btn.classList.add('reported');
+  btn.innerHTML='<i class="ti ti-check"></i> Reported';
 }
 
 function formatDate(iso){
@@ -446,6 +477,7 @@ function renderProjects(){
 
     const minTime=timeArr.includes('15')?'15':timeArr.includes('60')?'60':'ongoing';
     const fresh=freshnessInfo(p.last_commit);
+    const isReported=reportedLinks.has(p.id);
     const card=document.createElement('div');
     card.dataset.freshDays=(fresh.days===undefined?99999:fresh.days);
     card.className='p-card';
@@ -468,6 +500,9 @@ function renderProjects(){
       ${tasksHTML}
       <div class="p-foot">
         <a class="p-link" href="${p.repo_url}" target="_blank"><i class="ti ti-brand-github"></i> View repo</a>
+        <button class="p-link p-report ${isReported?'reported':''}" type="button" onclick="reportBrokenLink('${p.id}',this)" ${isReported?'disabled':''}>
+          <i class="ti ${isReported?'ti-check':'ti-link-off'}"></i> ${isReported?'Reported':'Report link'}
+        </button>
         <div class="p-fresh ${fresh.cls}">${fresh.label}</div>
         <div class="p-time"><i class="ti ti-clock"></i> ${TIME_LABELS[minTime]}</div>
       </div>`;
